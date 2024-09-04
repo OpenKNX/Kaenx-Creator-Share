@@ -1248,7 +1248,7 @@ namespace Kaenx.Creator.Classes
                 ComObject comObject = ver.ComObjects.ToList().Find(x => x.Number == comObjectNumberCounter);
                 if (comObject != null)
                 {
-                    byte configByte = CreateConfigByte(comObject);
+                    byte configByte = CreateConfigByte(comObject, general.Info.Mask.ManagementModel);
                     byte typeByte = CreateTypeByte(comObject);
 
                     // Berechnen der Stelle des GroupObject Descriptors im Data Segment
@@ -1281,35 +1281,31 @@ namespace Kaenx.Creator.Classes
             return data;
         }
 
-         private static byte CreateConfigByte(ComObject comObject)
+         private static byte CreateConfigByte(ComObject comObject, string managementModel)
         {
             byte configByte = 0;
-            if(comObject.FlagUpdate)
+
+            if(managementModel == "Bcu1"){
+                configByte |= (1 << 7); // bei den Masken 0x0010, 0x0011 und 0x0012 ist das 7. Bit immer 1
+            }else if(comObject.FlagUpdate)
             {
                 configByte |= (1 << 7);
             }
-            if (comObject.FlagTrans)
-            {
-                configByte |= (1 << 6);
-            }
-            if (comObject.FlagWrite)
-            {
-                configByte |= (1 << 4);
-            }
-            if (comObject.FlagRead)
-            {
-                configByte |= (1 << 3);
-            }
-            if (comObject.FlagComm)
-            {
-                configByte |= (1 << 2);
-            }
-            // Vorerst hat jedes ComObject die Priorität "low priority"
-            configByte |= (byte)0x3;
 
-            // ToDo: wie heisst das Transmissiion Priority Flag in der knxprod Datei?
-            // Muss noch in den Import Helper integriert werden
-            //configByte |= (byte)comObject.TransmissionPriority;
+            if (comObject.FlagTrans)
+                configByte |= (1 << 6);
+
+            if (comObject.FlagWrite)
+                configByte |= (1 << 4);
+
+            if (comObject.FlagRead)
+                configByte |= (1 << 3);
+
+            if (comObject.FlagComm)
+                configByte |= (1 << 2);
+
+            // Bit 0 und 1 im config Byte geben die Priorität an
+            configByte |= (byte)0x3; // low priority
 
             return configByte;
         }
