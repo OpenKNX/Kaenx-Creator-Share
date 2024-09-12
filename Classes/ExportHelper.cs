@@ -1153,23 +1153,24 @@ namespace Kaenx.Creator.Classes
                             
                             byte[] groupObjectTableData = CalculateGroupObjectTable(ver);
                             byte[] segmentData = new byte[ver.ComObjectMemoryObject.Size];
-                            for(int i = 0; i < ver.ComObjectTableOffset; i++){
+                            for(int i = 0; i < ver.ComObjectTableOffset; i++) {
                                 segmentData[i] = 0;
                             }
-                            groupObjectTableData.CopyTo(segmentData, ver.ComObjectTableOffset);
-                            if(general.Info.Mask.ManagementModel == "Bcu1"){
-                                segmentData[0] = (byte)(ver.ComObjectMemoryObject.Size - 1);
-                                //segmentData[13] = 0xff; // keine Ahnung...
-                                //segmentData[14] = 0x60; // Byte 0x010E der BCU1 (Routing-count constant)
-                                //segmentData[15] = 0x63; // Byte 0x010F der BCU1 (INAK-Retransmit-Limit | BUSY-Retransmit-Limit)
-                                //segmentData[16] = 0xef; // Byte 0x0110 der BCU1 (Configuration Descriptor)
-                                //segmentData[17] = 0x65; // keine Ahnung...
-                                segmentData[18] = (byte)ver.ComObjectTableOffset; // -> Byte 0x0112 der BCU1 (Pointer to Communication Object Table)
+                            // check if the GroupObjectTable at Offset will fit into the data section
+                            if(ver.ComObjectTableOffset + groupObjectTableData.Length <= ver.ComObjectMemoryObject.Size) {
+                                groupObjectTableData.CopyTo(segmentData, ver.ComObjectTableOffset);
+                                if(general.Info.Mask.ManagementModel == "Bcu1"){
+                                    // if the ManagementModel is BCU1 the first Byte has to contain the size of the data section
+                                    segmentData[0] = (byte)(ver.ComObjectMemoryObject.Size - 1); 
+                                    // the next data bytes will be transferred from ETS to the specified addresses in the BCU1
+                                    //segmentData[14] = 0x60; // Byte 0x010E of the BCU1 (Routing-count constant)
+                                    //segmentData[15] = 0x63; // Byte 0x010F of the BCU1 (INAK-Retransmit-Limit | BUSY-Retransmit-Limit)
+                                    //segmentData[16] = 0xef; // Byte 0x0110 of the BCU1 (Configuration Descriptor)
+                                    segmentData[18] = (byte)ver.ComObjectTableOffset; // Byte 0x0112 of the BCU1 (Pointer to Communication Object Table)
+                                }
                             }
-
                             xmem.Add(new XElement(Get("Data"), System.Convert.ToBase64String(segmentData)));
                         }
-                        //xmem.Add(new XElement(Get("Data"), "Hier kommt toller Base64 String hin"));
                         break;
 
                     case MemoryTypes.Relative:
