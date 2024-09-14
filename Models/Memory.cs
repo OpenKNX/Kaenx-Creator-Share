@@ -139,9 +139,15 @@ namespace Kaenx.Creator.Models
             {
                 int paraAddr = Address + offset + i;
                 int secAddr = paraAddr - (paraAddr % 16);
-                MemorySection sec = Sections.Single(s => s.Address == secAddr);
-                int byteIndex = paraAddr - secAddr;
-                sec.Bytes[byteIndex].SetByteUsed(usage, usedBy);
+                try{
+                    MemorySection sec = Sections.Single(s => s.Address == secAddr);
+                    int byteIndex = paraAddr - secAddr;
+                    sec.Bytes[byteIndex].SetByteUsed(usage, usedBy);
+                }catch(Exception e){
+                    if (e is InvalidOperationException){
+                        return;
+                    }
+                }
             }
         }
 
