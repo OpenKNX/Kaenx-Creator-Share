@@ -31,6 +31,8 @@ namespace Kaenx.Creator.Classes
                     MemoryCalculationAssocs(general.Application, mem);
                 if(general.Application.ComObjectMemoryObject == mem)
                     MemoryCalculationComs(general, mem);
+                if(general.Info.Mask.ManagementModel == "Bcu1")
+                    mem.SetBytesUsed(MemoryByteUsage.Bcu1Data, 19, 0);
             }
             MemoryCalculationRegular(general.Application, mem);
         }
