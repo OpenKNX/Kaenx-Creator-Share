@@ -143,9 +143,9 @@ namespace Kaenx.Creator.Models
                     MemorySection sec = Sections.Single(s => s.Address == secAddr);
                     int byteIndex = paraAddr - secAddr;
                     sec.Bytes[byteIndex].SetByteUsed(usage, usedBy);
-                }catch(Exception e){
-                    if (e is InvalidOperationException){
-                        return;
+                }catch(Exception ex){
+                    if (ex is InvalidOperationException){
+                        throw new Exception("out_of_memory");
                     }
                 }
             }
